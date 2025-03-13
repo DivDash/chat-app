@@ -63,6 +63,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '523321840232',
     projectId: 'chat-71de8',
     storageBucket: 'chat-71de8.firebasestorage.app',
+    androidClientId: '523321840232-qm3k5814f1uvsakcochmbjitiu1ok57u.apps.googleusercontent.com',
+    iosClientId: '523321840232-7mg4vclu5jafv3bkrldchrqqtqr9s60l.apps.googleusercontent.com',
     iosBundleId: 'com.example.chat',
   );
+
 }
