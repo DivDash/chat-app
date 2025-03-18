@@ -1,11 +1,10 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat/main.dart';
+import 'package:chat/api/api_database.dart';
+import 'package:chat/models/chat_user.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
-import '../API/api.dart';
-import '../main.dart';
-import '../models/chat_user.dart';
 import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -29,7 +28,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         floatingActionButton: FloatingActionButton.extended(
           backgroundColor: Colors.redAccent,
           onPressed: () async {
-            await Api.auth.signOut().then((value) async {
+            await ApiDatabase.auth.signOut().then((value) async {
               await GoogleSignIn().signOut().then((value) {
                 //for hiding the current screen
                 Navigator.pop(context);
@@ -107,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   TextFormField(
                     initialValue: widget.user.name,
-                    onSaved: (val) => Api.selfUser.name = val ?? '',
+                    onSaved: (val) => ApiDatabase.selfUser.name = val ?? '',
                     validator: (val) => val != null && val.isNotEmpty ? null : 'Required field',
                     decoration: InputDecoration(
                         prefixIcon: Icon(Icons.person),
@@ -122,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   TextFormField(
                     initialValue: widget.user.about,
-                    onSaved: (val) => Api.selfUser.about = val ?? '',
+                    onSaved: (val) => ApiDatabase.selfUser.about = val ?? '',
                     validator: (val) => val != null && val.isNotEmpty ? null : 'Required field',
                     decoration: InputDecoration(
                         prefixIcon: Icon(Icons.info_outline),
@@ -142,15 +141,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
-                          Api.updateUserInfo().then((value){
+                          ApiDatabase.updateUserInfo().then((value){
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                 content: Text("Profile Updated Successfully")));
 
                           });
-                
-
-                          
-                          
                         }
                       },
                       icon: Icon(Icons.edit),

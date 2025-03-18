@@ -1,11 +1,10 @@
-
+import 'package:chat/main.dart';
+import 'package:chat/api/api_database.dart';
+import 'package:chat/models/chat_user.dart';
+import 'package:chat/models/message.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-import '../API/api.dart';
-import '../main.dart';
-import '../models/chat_user.dart';
-import '../models/message.dart';
 import '../widgets/message_card.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -33,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [ 
           Expanded(
             child: StreamBuilder(
-            stream: Api.getAllMessages(widget.user),
+            stream: ApiDatabase.getAllMessages(widget.user),
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 //if data is loading
@@ -43,10 +42,12 @@ class _ChatScreenState extends State<ChatScreen> {
                 //if some or all data is loading then show it
                 case ConnectionState.active:
                 case ConnectionState.done:
-                  final data = snapshot.data?.docs;
-                  _list =
-                      data?.map((e) => Message.fromJson(e.data())).toList() ??
-                          [];
+                  final data = snapshot.data?.snapshot.children;
+                  _list = data
+                      ?.map((e) => Message.fromJson(
+                          Map<String, dynamic>.from(e.value as Map)))
+                      .toList() ??
+                      [];
     
             
             
@@ -188,9 +189,9 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: () {
               if (_textController.text.isNotEmpty) {
                 if (_list.isEmpty) {
-                  Api.sendFirstMessage(widget.user, _textController.text, Type.text);
+                  ApiDatabase.sendMessage(widget.user, _textController.text);
                 } else {
-                Api.sendMessage(widget.user, _textController.text);
+                ApiDatabase.sendMessage(widget.user, _textController.text);
                 }
                 _textController.text = '';
               }

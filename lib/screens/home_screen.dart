@@ -1,10 +1,11 @@
-import 'package:chat/helper/dialogs.dart';
+import 'dart:math';
+
+import 'package:chat/api/api_database.dart';
+import 'package:chat/helpers/toast_message.dart';
+import 'package:chat/models/chat_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
-import '../API/api.dart';
-import '../models/chat_user.dart';
 import '../widgets/chat_user_card.dart';
 import 'profile_screen.dart';
 
@@ -23,7 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    Api.getSelfInfo();
+    ApiDatabase.getSelfInfo();
   }
 
   @override
@@ -73,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (_) => ProfileScreen(user: Api.selfUser)));
+                        builder: (_) => ProfileScreen(user: ApiDatabase.selfUser)));
               },
             ),
           ],
@@ -85,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Icon(Icons.add_comment),
         ),
         body: StreamBuilder(
-            stream: Api.getMyUserId(),
+            stream: ApiDatabase.getMyUsers(),
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 //if data is loading
@@ -96,8 +97,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 case ConnectionState.active:
                 case ConnectionState.done:
                   return StreamBuilder(
-                    stream: Api.getAllUsers(
-                        snapshot.data?.docs.map((e) => e.id).toList() ?? []),
+                    stream: ApiDatabase.getAllUsers(
+                        snapshot.data?.snapshot.children
+                            .map((e) => e.key ?? '')
+                            .toList() ?? []),
+                            //get only those users whose id are provided
                     builder: (context, snapshot) {
                       switch (snapshot.connectionState) {
                         //if data is loading
@@ -107,9 +111,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         //if some or all data is loading then show it
                         case ConnectionState.active:
                         case ConnectionState.done:
-                          final data = snapshot.data?.docs;
+                          final data = snapshot.data?.snapshot.children;
                           _list = data
-                                  ?.map((e) => ChatUser.fromJson(e.data()))
+                                  ?.map((e) => ChatUser.fromJson(
+                                      Map<String, dynamic>.from(e.value as Map)))
                                   .toList() ??
                               [];
 
@@ -179,13 +184,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () async {
                     if (email.isNotEmpty) {
                       Navigator.pop(context);
-                      if (email.isNotEmpty)
-                        await Api.addChatUser(email).then((value) {
+                      if (email.isNotEmpty) {
+                        await ApiDatabase.addChatUser(email, ApiDatabase.user.uid).then((value) {
                           if (!value) {
-                            Dialogs.showSnackbar(
-                                context, 'User does not exist!');
+                            ToastMessage().toastMessage('User does not exist!, $e');
                           }
                         });
+                      }
                     }
                   },
                   child: Text('Add'),
