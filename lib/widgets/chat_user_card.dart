@@ -1,10 +1,10 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat/models/chat_user.dart';
+import 'package:chat/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../main.dart';
-import '../models/chat_user.dart';
-import '../screens/chat_screen.dart';
 
 class ChatUserCard extends StatefulWidget {
   final ChatUser user;

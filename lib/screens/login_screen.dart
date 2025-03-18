@@ -1,12 +1,12 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:chat/main.dart';
+import 'package:chat/api/api_database.dart';
+import 'package:chat/helpers/toast_message.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../API/api.dart';
-import '../helper/dialogs.dart';
-import '../main.dart';
 import 'home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -34,11 +34,11 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user != null) {
         log('\nUser: ${user.user}');
         log('\nUserAdditionalInfo: ${user.additionalUserInfo}');
-        if ((await Api.userExists())) {
+        if ((await ApiDatabase.userExists(user.user!.uid))) {
           Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (_) => HomeScreen()));
         } else {
-          await Api.createUser().then((value) {
+          await ApiDatabase.createUser().then((value) {
             Navigator.pushReplacement(
                 context, MaterialPageRoute(builder: (_) => HomeScreen()));
           });
@@ -68,11 +68,10 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       // Once signed in, return the UserCredential
-      return await Api.auth.signInWithCredential(credential);
+      return await ApiDatabase.auth.signInWithCredential(credential);
     } catch (e) {
       log('\nsignInWithGoogle: $e');
-      Dialogs.showSnackbar(
-          context, 'Something went wrong (check internet connection!)');
+      ToastMessage().toastMessage('Something went wrong (check internet connection!) $e');
       return null;
     }
   }

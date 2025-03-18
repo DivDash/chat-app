@@ -1,10 +1,11 @@
 import 'dart:developer';
+import 'package:chat/main.dart';
+import 'package:chat/api/api_database.dart';
 import 'package:flutter/material.dart';
-
-import '../API/api.dart';
-import '../helper/my_date_utils.dart';
-import '../main.dart';
+import 'package:chat/helpers/date_utils.dart';
 import '../models/message.dart';
+
+
 
 class MessageCard extends StatefulWidget {
   const MessageCard({super.key, required this.message});
@@ -18,7 +19,7 @@ class MessageCard extends StatefulWidget {
 class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
-    return Api.user.uid == widget.message.fromId
+    return ApiDatabase.user.uid == widget.message.fromId
         ? _greenMessage()
         : _blueMessage();
   }
@@ -28,7 +29,7 @@ class _MessageCardState extends State<MessageCard> {
 
     //update last message
     if (widget.message.read.isEmpty) {
-      Api.updateMessageReadStatus(widget.message);
+      ApiDatabase.updateMessageReadStatus(widget.message);
       log('message read updated');
       
     }
