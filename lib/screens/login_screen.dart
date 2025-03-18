@@ -1,13 +1,11 @@
 import 'dart:developer';
-import 'dart:io';
 import 'package:chat/main.dart';
-import 'package:chat/api/api_database.dart';
-import 'package:chat/helpers/toast_message.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:chat/services/database_service.dart';
+import 'package:chat/services/google_service.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 
 import 'home_screen.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -28,17 +26,16 @@ class _LoginScreenState extends State<LoginScreen> {
       });
     });
   }
-
-  _handleGoogleBtn() {
-    signInWithGoogle().then((user) async {
+_handleGoogleBtn() {
+    GoogleService.signInWithGoogle().then((user) async {
       if (user != null) {
         log('\nUser: ${user.user}');
         log('\nUserAdditionalInfo: ${user.additionalUserInfo}');
-        if ((await ApiDatabase.userExists(user.user!.uid))) {
+        if ((await DatabaseService.userExists(user.user!.uid))) {
           Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (_) => HomeScreen()));
         } else {
-          await ApiDatabase.createUser().then((value) {
+          await DatabaseService.createUser().then((value) {
             Navigator.pushReplacement(
                 context, MaterialPageRoute(builder: (_) => HomeScreen()));
           });
@@ -46,36 +43,9 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     });
   }
+ 
 
-  Future<UserCredential?> signInWithGoogle() async {
-    try {
-      await InternetAddress.lookup('google.com');
-      // Trigger the authentication flow
-      final GoogleSignInAccount? googleUser = await GoogleSignIn(
-              // serverClientId:
-              //     '230242789252-f9435ljrja4toate4qtpiq4b46o552m0.apps.googleusercontent.com'
-                  )
-          .signIn();
-
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication? googleAuth =
-          await googleUser?.authentication;
-
-      // Create a new credential
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
-      );
-
-      // Once signed in, return the UserCredential
-      return await ApiDatabase.auth.signInWithCredential(credential);
-    } catch (e) {
-      log('\nsignInWithGoogle: $e');
-      ToastMessage().toastMessage('Something went wrong (check internet connection!) $e');
-      return null;
-    }
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     mq = MediaQuery.of(context).size;

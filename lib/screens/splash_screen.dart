@@ -1,7 +1,7 @@
 
 import 'dart:developer';
 import 'package:chat/main.dart';
-import 'package:chat/api/api_database.dart';
+import 'package:chat/services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
@@ -31,8 +31,8 @@ class _SplashScreenState extends State<SplashScreen> {
       setState(() {
         _isAnimate = true;
       });
-      if (ApiDatabase.auth.currentUser != null) {
-        log('\nUser: ${ApiDatabase.auth.currentUser}');
+      if (AuthService.auth.currentUser != null) {
+        log('\nUser: ${AuthService.auth.currentUser}');
         log('\nUserAdditionalInfo: ${FirebaseAuth.instance.currentUser}');
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => HomeScreen()));

@@ -1,11 +1,10 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat/main.dart';
-import 'package:chat/api/api_database.dart';
 import 'package:chat/models/chat_user.dart';
+import 'package:chat/services/storage_service.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'login_screen.dart';
+import '../widgets/sign_out_btn.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   final ChatUser user;
@@ -25,26 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         appBar: AppBar(
           title: Text("Profile Screen"),
         ),
-        floatingActionButton: FloatingActionButton.extended(
-          backgroundColor: Colors.redAccent,
-          onPressed: () async {
-            await ApiDatabase.auth.signOut().then((value) async {
-              await GoogleSignIn().signOut().then((value) {
-                //for hiding the current screen
-                Navigator.pop(context);
-
-                //for navigating to the home screen
-                Navigator.pop(context);
-
-                //replacing the current screen with the login screen
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => LoginScreen()));
-              });
-            });
-          },
-          icon: Icon(Icons.logout),
-          label: Text("Logout"),
-        ),
+        floatingActionButton: SignOutBtn(context),
         body: Form(
           key: _formKey,
           child: Padding(
@@ -79,7 +59,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2)),
+                              border:
+                                  Border.all(color: Colors.white, width: 2)),
                           child: Padding(
                             padding: const EdgeInsets.all(5),
                             child: Icon(
@@ -106,8 +87,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   TextFormField(
                     initialValue: widget.user.name,
-                    onSaved: (val) => ApiDatabase.selfUser.name = val ?? '',
-                    validator: (val) => val != null && val.isNotEmpty ? null : 'Required field',
+                    onSaved: (val) => StorageService.selfUser.name = val ?? '',
+                    validator: (val) =>
+                        val != null && val.isNotEmpty ? null : 'Required field',
                     decoration: InputDecoration(
                         prefixIcon: Icon(Icons.person),
                         labelText: "Name",
@@ -121,8 +103,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   TextFormField(
                     initialValue: widget.user.about,
-                    onSaved: (val) => ApiDatabase.selfUser.about = val ?? '',
-                    validator: (val) => val != null && val.isNotEmpty ? null : 'Required field',
+                    onSaved: (val) => StorageService.selfUser.about = val ?? '',
+                    validator: (val) =>
+                        val != null && val.isNotEmpty ? null : 'Required field',
                     decoration: InputDecoration(
                         prefixIcon: Icon(Icons.info_outline),
                         labelText: "About",
@@ -141,10 +124,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           _formKey.currentState!.save();
-                          ApiDatabase.updateUserInfo().then((value){
+                          StorageService.updateUserInfo().then((value) {
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                 content: Text("Profile Updated Successfully")));
-
                           });
                         }
                       },

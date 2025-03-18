@@ -1,11 +1,9 @@
 import 'dart:developer';
 import 'package:chat/main.dart';
-import 'package:chat/api/api_database.dart';
+import 'package:chat/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:chat/helpers/date_utils.dart';
 import '../models/message.dart';
-
-
 
 class MessageCard extends StatefulWidget {
   const MessageCard({super.key, required this.message});
@@ -19,22 +17,20 @@ class MessageCard extends StatefulWidget {
 class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
-    return ApiDatabase.user.uid == widget.message.fromId
+    return DatabaseService.user.uid == widget.message.fromId
         ? _greenMessage()
         : _blueMessage();
   }
 
   //sender or other user message
   Widget _blueMessage() {
-
     //update last message
     if (widget.message.read.isEmpty) {
-      ApiDatabase.updateMessageReadStatus(widget.message);
+      DatabaseService.updateMessageReadStatus(widget.message);
       log('message read updated');
-      
     }
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Flexible(
           child: Container(
@@ -49,20 +45,26 @@ class _MessageCardState extends State<MessageCard> {
                 bottomRight: Radius.circular(20),
               ),
             ),
-            child: Text(
-              widget.message.msg,
-              style: TextStyle(fontSize: 17, color: Colors.black87),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.message.msg,
+                  style: TextStyle(fontSize: 17, color: Colors.black87),
+                ),
+                //message time
+                Padding(
+                  padding: EdgeInsets.only(
+                    right: mq.width * 0.04,
+                  ),
+                  child: Text(
+                    MyDateUtils.getFormattedDateTime(
+                        context: context, time: widget.message.sent),
+                    style: TextStyle(color: Colors.black54, fontSize: 12, ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ),
-
-        //message time 
-        Padding(
-          padding: EdgeInsets.only(right: mq.width * 0.04),
-          child: Text(
-              MyDateUtils.getFormattedDateTime(
-                  context: context, time: widget.message.sent),
-            style: TextStyle(color: Colors.black54, fontSize: 13),
           ),
         ),
       ],
@@ -72,33 +74,8 @@ class _MessageCardState extends State<MessageCard> {
   //receiver or self message
   Widget _greenMessage() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Row(
-          children: [
-            //for adding some space
-            SizedBox(
-              width: mq.width * 0.04,
-            ),
-            //icon of double tick
-            if (widget.message.read.isNotEmpty)
-              Icon(
-                Icons.done_all_rounded,
-                color: Colors.blue,
-                size: 20,
-              ),
-            // for add space bw
-            SizedBox(
-              width: mq.width * 0.01,
-            ),
-            //sent time
-            Text(
-              MyDateUtils.getFormattedDateTime(
-                  context: context, time: widget.message.sent),
-              style: TextStyle(color: Colors.black54, fontSize: 13),
-            ),
-          ],
-        ),
         Flexible(
           child: Container(
             padding: EdgeInsets.all(mq.width * 0.02),
@@ -112,9 +89,42 @@ class _MessageCardState extends State<MessageCard> {
                 bottomLeft: Radius.circular(20),
               ),
             ),
-            child: Text(
-              widget.message.msg,
-              style: TextStyle(fontSize: 17, color: Colors.black87),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  widget.message.msg,
+                  style: TextStyle(fontSize: 17, color: Colors.black87),
+                  textAlign: TextAlign.end,
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    //sent time
+                    Text(
+                      MyDateUtils.getFormattedDateTime(
+                          context: context, time: widget.message.sent),
+                      style: TextStyle(color: Colors.black54, fontSize: 13),
+                    ),
+                    // for add space bw
+                    SizedBox(
+                      width: mq.width * 0.01,
+                    ),
+                    //icon of double tick
+                    if (widget.message.read.isNotEmpty)
+                      Icon(
+                        Icons.done_all_rounded,
+                        color: Colors.blue,
+                        size: 20,
+                      ),
+                    //for adding some space
+                    SizedBox(
+                      width: mq.width * 0.02,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
