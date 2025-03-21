@@ -1,13 +1,12 @@
-import 'dart:math';
 
-import 'package:chat/api/api_database.dart';
-import 'package:chat/helpers/toast_message.dart';
 import 'package:chat/models/chat_user.dart';
+import 'package:chat/services/database_service.dart';
+import 'package:chat/widgets/add_person_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import '../widgets/chat_user_card.dart';
-import 'profile_screen.dart';
+import '../widgets/home_btn.dart';
+import '../widgets/vert_dots.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,21 +23,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    ApiDatabase.getSelfInfo();
+    DatabaseService.getSelfInfo();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
         appBar: AppBar(
-          
-          leading: IconButton(
-            icon: const Icon(Icons.home),
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-          ),
+          leading: HomeButton(context),
           title: _isSearching
               ? TextField(
                   decoration: InputDecoration(
@@ -58,25 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 )
               : Text("Div Chat"),
           actions: [
-            IconButton(
-              icon: Icon(_isSearching
-                  ? CupertinoIcons.clear_circled_solid
-                  : Icons.search),
-              onPressed: () {
-                setState(() {
-                  _isSearching = !_isSearching;
-                });
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.more_vert),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => ProfileScreen(user: ApiDatabase.selfUser)));
-              },
-            ),
+            SearchButton(),
+            VerticalDots(context),
           ],
         ),
         floatingActionButton: FloatingActionButton(
@@ -86,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Icon(Icons.add_comment),
         ),
         body: StreamBuilder(
-            stream: ApiDatabase.getMyUsers(),
+            stream: DatabaseService.getMyUsers(),
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 //if data is loading
@@ -97,11 +72,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 case ConnectionState.active:
                 case ConnectionState.done:
                   return StreamBuilder(
-                    stream: ApiDatabase.getAllUsers(
-                        snapshot.data?.snapshot.children
+                    stream: DatabaseService.getAllUsers(snapshot
+                            .data?.snapshot.children
                             .map((e) => e.key ?? '')
-                            .toList() ?? []),
-                            //get only those users whose id are provided
+                            .toList() ??
+                        []),
+                    //get only those users whose id are provided
                     builder: (context, snapshot) {
                       switch (snapshot.connectionState) {
                         //if data is loading
@@ -114,7 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           final data = snapshot.data?.snapshot.children;
                           _list = data
                                   ?.map((e) => ChatUser.fromJson(
-                                      Map<String, dynamic>.from(e.value as Map)))
+                                      Map<String, dynamic>.from(
+                                          e.value as Map)))
                                   .toList() ??
                               [];
 
@@ -146,56 +123,22 @@ class _HomeScreenState extends State<HomeScreen> {
             }));
   }
 
+//for search btn
+  IconButton SearchButton() {
+    return IconButton(
+      icon: Icon(
+          _isSearching ? CupertinoIcons.clear_circled_solid : Icons.search),
+      onPressed: () {
+        setState(() {
+          _isSearching = !_isSearching;
+        });
+      },
+    );
+  }
+
   //for addng chat user dialog
   void _addChatUserDialog() {
     String email = '';
-
-    showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-              contentPadding: const EdgeInsets.only(
-                  left: 20, right: 20, top: 20, bottom: 10),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              title: Row(
-                children: [
-                  Icon(
-                    Icons.person_add,
-                    size: 28,
-                  ),
-                  Text("Enter Email"),
-                ],
-              ),
-              content: TextFormField(
-                maxLines: 1,
-                onChanged: (value) => email = value,
-                decoration: InputDecoration(
-                  hintText: 'Email',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    if (email.isNotEmpty) {
-                      Navigator.pop(context);
-                      if (email.isNotEmpty) {
-                        await ApiDatabase.addChatUser(email, ApiDatabase.user.uid).then((value) {
-                          if (!value) {
-                            ToastMessage().toastMessage('User does not exist!, $e');
-                          }
-                        });
-                      }
-                    }
-                  },
-                  child: Text('Add'),
-                ),
-              ],
-            ));
+    AddNewPersonDialog(context, email);
   }
 }

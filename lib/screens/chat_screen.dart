@@ -1,10 +1,9 @@
 import 'package:chat/main.dart';
-import 'package:chat/api/api_database.dart';
 import 'package:chat/models/chat_user.dart';
 import 'package:chat/models/message.dart';
+import 'package:chat/services/database_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
 import '../widgets/message_card.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -32,7 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [ 
           Expanded(
             child: StreamBuilder(
-            stream: ApiDatabase.getAllMessages(widget.user),
+            stream: DatabaseService.getAllMessages(widget.user),
             builder: (context, snapshot) {
               switch (snapshot.connectionState) {
                 //if data is loading
@@ -189,9 +188,9 @@ class _ChatScreenState extends State<ChatScreen> {
             onPressed: () {
               if (_textController.text.isNotEmpty) {
                 if (_list.isEmpty) {
-                  ApiDatabase.sendMessage(widget.user, _textController.text);
+                  DatabaseService.sendMessage(widget.user, _textController.text);
                 } else {
-                ApiDatabase.sendMessage(widget.user, _textController.text);
+                DatabaseService.sendMessage(widget.user, _textController.text);
                 }
                 _textController.text = '';
               }

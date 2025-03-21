@@ -5,21 +5,42 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "chat",
+            "name": "Run Firebase Emulator",
+            "type": "node-terminal",
             "request": "launch",
-            "type": "dart"
+            "command": "firebase emulators:start --only auth,firestore,database,storage",
+        },
+        {
+            "name": "chat (development mode)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define",
+                "FLAVOR=development"
+            ]
         },
         {
             "name": "chat (profile mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define",
+                "FLAVOR=production"
+            ]
         },
         {
             "name": "chat (release mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define",
+                "FLAVOR=production"
+            ]
         }
     ]
 }
