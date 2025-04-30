@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:chat/services/database_service.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import '../models/message.dart';
+
 
 import '../models/chat_user.dart';
 
@@ -12,11 +14,8 @@ class StorageService {
   //for accessing firebase storage
   static FirebaseStorage storage = FirebaseStorage.instance;
 
-  //for storing self user info
-  static late ChatUser selfUser;
-
   //for updating user info
-  static Future<void> updateUserInfo() async {
+  static Future<void> updateUserInfo(ChatUser selfUser) async {
     await DatabaseService.getUserRef(DatabaseService.user.uid).update({
       'name': selfUser.name,
       'about': selfUser.about,
@@ -25,7 +24,7 @@ class StorageService {
   }
 
   //for update profile picture
-  static Future<void> updateProfilePicture(File file) async {
+  static Future<void> updateProfilePicture(File file, ChatUser selfUser) async {
     final ext = file.path.split('.').last;
     log('Extension: $ext');
     //uploading image to firebase storage
@@ -45,5 +44,16 @@ class StorageService {
     //await getUserRef(user.uid).update({'image': selfUser.image});
     await DatabaseService.getUserRef(DatabaseService.user.uid)
         .update({'image': selfUser.image});
+  }
+
+  //send chat image
+  static Future<String> uploadImage(File file, ChatUser chatUser) async {
+    final ext = file.path.split('.').last;
+    final ref = storage
+        .ref()
+        .child('images/${DatabaseService.getConversationID(chatUser.id)}/${DateTime.now().microsecondsSinceEpoch}.$ext');
+
+    await ref.putFile(file, SettableMetadata(contentType: 'image/$ext'));
+    return await ref.getDownloadURL();
   }
 }

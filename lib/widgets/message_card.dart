@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat/main.dart';
 import 'package:chat/services/database_service.dart';
 import 'package:flutter/material.dart';
@@ -48,10 +49,20 @@ class _MessageCardState extends State<MessageCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                widget.message.type == Type.text ? 
                 Text(
                   widget.message.msg,
                   style: TextStyle(fontSize: 17, color: Colors.black87),
-                ),
+                ): ClipRRect(
+          borderRadius: BorderRadius.circular(mq.height * 0.1),
+          child: CachedNetworkImage(
+            fit: BoxFit.fill,
+            imageUrl: widget.message.msg,
+            placeholder: (context, url) => CircularProgressIndicator(),
+            errorWidget: (context, url, error) =>
+              Icon(Icons.image, size: 70,),
+          ),
+        ),
                 //message time
                 Padding(
                   padding: EdgeInsets.only(
@@ -92,11 +103,21 @@ class _MessageCardState extends State<MessageCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
+                 widget.message.type == Type.text ? 
                 Text(
                   widget.message.msg,
                   style: TextStyle(fontSize: 17, color: Colors.black87),
                   textAlign: TextAlign.end,
-                ),
+                ): ClipRRect(
+          borderRadius: BorderRadius.circular(mq.height * 0.1),
+          child: CachedNetworkImage(
+            fit: BoxFit.fill,
+            imageUrl: widget.message.msg,
+            placeholder: (context, url) => CircularProgressIndicator(),
+            errorWidget: (context, url, error) =>
+              Icon(Icons.image, size: 70,),
+          ),
+        ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.end,
